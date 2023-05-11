@@ -1,10 +1,15 @@
-
+#define START 1;
+#define GAP_LEFT 2;
+#define TANK_RIGHT 3;
+#define CURVY 4;
+#define LOOP 5;
 
 const int left_sens = A0;
 const int mid_sens = A1;
 const int right_sens = A2;
 
 int threshold = 600;
+int state = 1;
 
 const int PWML=11; // Pololu drive A
 const int LIN2=10;
