@@ -39,9 +39,9 @@ int r;
 int m;
 
 // Average Line Sensor Variables
-int avg_l;
-int avg_r;
-int avg_m;
+double avg_l;
+double avg_r;
+double avg_m;
 
 
 #define GAP 1;
@@ -88,6 +88,9 @@ void loop() {
     case GAP_LEFT:
       cur_turn = turn_dir(prev);
       prev = cur_turn;
+      avg_l = get_avg(prev_left, 20);
+      avg_r = get_avg(prev_right, 20);
+      avg_m = get_avg(prev_mid, 20);
 
       update_prev_turn(cur_turn);
       make_turn(cur_turn, aggr);
@@ -226,4 +229,16 @@ void update_prev_turn(int cur_turn){
 void update_sens(int val, int sensor[]){
   memcpy(sensor, &sensor[1], sizeof(sensor) - sizeof(int));
   sensor[19] = val;
+}
+
+double get_avg(int arr[], int size){
+  double avg;
+  int sum = 0;
+
+  for (int i = 0; i < size; i++){
+    sum += arr[i];
+  }
+  avg = double(sum)/size;
+  
+  return avg;
 }
