@@ -9,7 +9,7 @@ const int mid_sens = A1;
 const int right_sens = A2;
 
 int threshold = 600;
-int state = 1;
+int state;
 
 const int PWML=11; // Pololu drive A
 const int LIN2=10;
@@ -22,10 +22,19 @@ const int PWMR =5;
 unsigned long start_time;
 unsigned long time;
 
-int prev_turn[10] = {0,  0, 0, 0, 0, 0, 0, 0, 0, 0};
+int prev_turn[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+int prev_mid[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+int prev_left[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+int prev_right[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
 int prev = 0;
 int cur_turn = 0;
 float aggr = 0.95;
+
+// Line Sensor Variables
+int l;
+int r;
+int m;
 
 #define GAP 1;
 #define RIGHT 2;
@@ -43,29 +52,61 @@ void setup() {
   pinMode(PWML , OUTPUT);
   pinMode(STDBY , OUTPUT);
   digitalWrite(STDBY , HIGH);
-  start_time = micros();
+
+  state = START;
+  start_time = millis();
 }
 
-void loop() {
   cur_turn = turn_dir(prev);
   prev = cur_turn;
   update_prev_turn(cur_turn);
   make_turn(cur_turn, aggr);
   delay(25);
-  // Serial.println(cur_turn);
-  //Serial.print(prev_turn[1]);
-  //delay(1000);
 
-  // put your main code here, to run repeatedly:
-  // Serial.print("Left Sensor: ");
-  // Serial.println(analogRead(left_sens));
-  // Serial.print("Middle Sensor: ");
-  // Serial.println(analogRead(mid_sens));
-  // Serial.print("Right Sensor: ");
-  // Serial.println(analogRead(right_sens));
-  // Serial.println(" ");
-  // motorWrite(155, LIN1, LIN2, PWML);
-  //delay(1000);
+void loop() {
+  l = sense_l();
+  r = sense_r();
+  m = sense_m();
+
+  switch (state){
+    case START:
+      simple();
+      if (millis() - start_time > 20000) state = GAP_LEFT;
+      break;
+
+    case GAP_LEFT:
+      cur_turn = turn_dir(prev);
+      prev = cur_turn;
+      update_prev_turn(cur_turn);
+      make_turn(cur_turn, aggr);
+      break;
+    
+    case TANK_RIGHT:
+      // BLuh
+      break;
+
+    case CURVY:
+      // Gobba
+      break;
+
+    case LOOP:
+      // GOO
+      break;
+
+    default:
+      state = START;
+      simple();
+      break;
+  }
+  
+  delay(25);
+}
+
+void simple(){
+  cur_turn = turn_dir(prev);
+  prev = cur_turn;
+  update_prev_turn(cur_turn);
+  make_turn(cur_turn, aggr);
 }
 
 void drive(int speedL, int speedR){
@@ -112,9 +153,6 @@ int sense_m() {
 }
 
 int turn_dir(int prev_turn) {
-  int l = sense_l();
-  int r = sense_r();
-  int m = sense_m();
   if (l == 1 && r == 1 && m == 1){
     return 0; //straight
   }
@@ -173,6 +211,7 @@ void update_prev_turn(int cur_turn){
   prev_turn[9] =  cur_turn;
 }
 
-void special_case(){
-
+void update_sens(int val, int sensor[]){
+  memcpy(sensor, &sensor[1], sizeof(sensor) - sizeof(int));
+  sensor[19] = val;
 }
