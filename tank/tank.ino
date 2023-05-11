@@ -8,7 +8,9 @@ const int left_sens = A0;
 const int mid_sens = A1;
 const int right_sens = A2;
 
-int threshold = 600;
+int threshold_l = 600;
+int threshold_r = 600;
+int threshold_m = 700;
 int state;
 
 const int PWML=11; // Pololu drive A
@@ -35,6 +37,12 @@ float aggr = 0.95;
 int l;
 int r;
 int m;
+
+// Average Line Sensor Variables
+int avg_l;
+int avg_r;
+int avg_m;
+
 
 #define GAP 1;
 #define RIGHT 2;
@@ -67,6 +75,9 @@ void loop() {
   l = sense_l();
   r = sense_r();
   m = sense_m();
+  update_sens(int l, prev_left);
+  update_sens(int r, prev_right);
+  update_sens(int m, prev_mid);
 
   switch (state){
     case START:
@@ -77,6 +88,7 @@ void loop() {
     case GAP_LEFT:
       cur_turn = turn_dir(prev);
       prev = cur_turn;
+
       update_prev_turn(cur_turn);
       make_turn(cur_turn, aggr);
       break;
@@ -128,24 +140,24 @@ void motorWrite(int spd, int pin_IN1 , int pin_IN2 , int pin_PWM){
 }
 
 int sense_l() {
-  int left = analogRead(left_sens);
-  if (left > 600) {
+  int s = analogRead(left_sens);
+  if (s > 600) {
     return 1;
   } else {
     return 0;
   }
 }
 int sense_r() {
-  int left = analogRead(right_sens);
-  if (left > 600) {
+  int s = analogRead(right_sens);
+  if (s > 600) {
     return 1;
   } else {
     return 0;
   }
 }
 int sense_m() {
-  int left = analogRead(mid_sens);
-  if (left > 700) {
+  int s = analogRead(mid_sens);
+  if (s > 700) {
     return 1;
   } else {
     return 0;
