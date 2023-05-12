@@ -2,7 +2,8 @@
 #define GAP_LEFT 2
 #define TANK_RIGHT 3
 #define CURVY 4
-#define LOOP 5
+#define DIAMOND 5
+#define LOOP 6
 
 const int left_sens = A0;
 const int mid_sens = A1;
@@ -24,11 +25,6 @@ const int PWMR =5;
 unsigned long start_time;
 unsigned long time;
 
-int prev_turn[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-int prev_mid[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-int prev_left[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-int prev_right[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
 int prev = 0;
 int cur_turn = 0;
 float aggr = 0.95;
@@ -48,10 +44,6 @@ bool prev_on_line = true;
 int gaps = 0;
 
 
-#define GAP 1;
-#define RIGHT 2;
-#define LEFT 3;
-
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -65,6 +57,8 @@ void setup() {
   pinMode(STDBY , OUTPUT);
   digitalWrite(STDBY , HIGH);
 
+  prev = 0;
+  cur_turn = 0;
   drive(0, 0);
 
   state = START;
@@ -92,7 +86,7 @@ void loop() {
       if (millis() - start_time > 23700){
         state = GAP_LEFT;
         start_time = millis();
-      } else if (millis() - start_time > 17000){
+      } else if (millis() - start_time > 16000){
         threshold_l = 750;
         threshold_r = 800;
         threshold_m = 800;
@@ -108,7 +102,8 @@ void loop() {
       if (gaps == 3){
         if(on_line == true){
           state = TANK_RIGHT;
-          drive(0, 0);
+          prev = -3;
+          //drive(0, 0);
         } else{
           drive(-255, 255);
         }
@@ -125,17 +120,46 @@ void loop() {
     
 
     case TANK_RIGHT:
-      cur_turn = turn_dir_3(prev);
-      prev = cur_turn;
-      make_turn(cur_turn, aggr);
+      if(on_line == false){
+        drive(255, -255);
+      } else if (prev_on_line == false){
+        state = CURVY;
+        prev = 3;
+        start_time = millis();
+        //drive(0, 0);
+      } else {
+        simple();
+      }
       break;
 
+
     case CURVY:
-      // Gobba
+      if(millis() - start_time > 5800){
+        drive(0, 0);
+        stae = LOOP;
+      } else {
+        cur_turn = turn_dir(prev);
+        prev = cur_turn;
+        make_turn_4(cur_turn);
+      }
+      break;
+
+    case DIAMOND:
+      if(on_line == false){
+        drive(255, -255);
+      } else if (prev_on_line == false){
+        state = LOOP;
+        prev = 3;
+        //drive(0, 0);
+      } else {
+        simple();
+      }
       break;
 
     case LOOP:
-      // GOO
+      cur_turn = turn_dir_6(prev);
+      prev = cur_turn;
+      make_turn_6(cur_turn);
       break;
 
     default:
@@ -150,8 +174,7 @@ void loop() {
 void simple(){
   cur_turn = turn_dir(prev);
   prev = cur_turn;
-  //update_prev_turn(cur_turn);
-  make_turn(cur_turn, aggr);
+  make_turn(cur_turn);
 }
 
 void drive(int speedL, int speedR){
@@ -285,7 +308,7 @@ int turn_dir_3(int prev_turn) {
   }
 }
 
-void make_turn(int turn, float aggr){
+void make_turn(int turn){
   if (turn == 0){
     drive(255, 255);
   }
@@ -309,42 +332,98 @@ void make_turn(int turn, float aggr){
   }
 }
 
-void make_turn_2(int turn, float aggr){
+void make_turn_2(int turn){
   if (turn == 0){
     drive(170, 170);
   }
   if (turn == 1){
-    drive(120, 120 - aggr*96);
+    drive(170, 30);
   }
   if (turn == 2) {
-    drive(90 + aggr*160, 90 - aggr*160);
+    drive(200, 10);
   }
   if (turn == -1){
-    drive(120 - aggr*120, 120 + aggr*120);
+    drive(30, 170);
   }
   if (turn == -2) {
-    drive(90 - aggr*160, 90 + aggr*160);
+    drive(10, 200);
   }
 }
 
-// void update_prev_turn(int cur_turn){
-//   memcpy(prev_turn, &prev_turn[1], sizeof(prev_turn) - sizeof(int));
-//   prev_turn[9] =  cur_turn;
-// }
+void make_turn_4(int turn){
+  if (turn == 0){
+    drive(170, 170);
+  }
+  if (turn == 1){
+    drive(170, 30);
+  }
+  if (turn == 2) {
+    drive(200, 10);
+  }
+  if (turn == 3){
+    drive(220, -30);
+  }
+  if (turn == -1){
+    drive(30, 170);
+  }
+  if (turn == -2) {
+    drive(10, 200);
+  }
+  if (turn == -3){
+    drive(-30, 220);
+  }
+}
 
-// void update_sens(int val, int sensor[]){
-//   memcpy(sensor, &sensor[1], sizeof(sensor) - sizeof(int));
-//   sensor[19] = val;
-// }
+int turn_dir_6(int prev_turn) {
+  if (l == 1 && r == 1 && m == 1){
+    return 1; // slight right
+  }
+  else if (l == 0 && r == 1 && m ==1){
+    return 2; // hard right
+  }
+  else if (l == 0 && r == 1 && m ==0){
+    return 3; // huge right
+  }
+  else if (l == 1 && r == 0 && m ==1){
+    return 0; // straight
+  }
+  else if (l == 1 && r == 0 && m ==0){
+    return -2; // big left
+  }
+  else if (l==0 && r == 0 && m == 0){
+    if (prev_turn == 2 || prev_turn == 1) {
+      return 3;
+    }
+    else if (prev_turn == -2 || prev_turn == -1) {
+      return -3;
+    }
+    return prev_turn; // continue last motion
+  }
+  else{
+    return 0;
+  }
+}
 
-// double get_avg(int arr[], int size){
-//   double avg;
-//   int sum = 0;
-
-//   for (int i = 0; i < size; i++){
-//     sum += arr[i];
-//   }
-//   avg = double(sum)/size;
-  
-//   return avg;
-// }
+void make_turn_6(int turn){
+  if (turn == 0){
+    drive(200, 200);
+  }
+  if (turn == 1){
+    drive(220, 70);
+  }
+  if (turn == 2) {
+    drive(255, 0);
+  }
+  if (turn == 3) {
+    drive(255, -200);
+  }
+  if (turn == -1){
+    drive(70, 255);
+  }
+  if (turn == -2) {
+    drive(100, 255);
+  }
+  if (turn == -3) {
+    drive(-120, 255);
+  }
+}

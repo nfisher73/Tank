@@ -53,6 +53,8 @@ void setup() {
   pinMode(STDBY , OUTPUT);
   digitalWrite(STDBY , HIGH);
 
+  prev = 0;
+  cur_turn = 0;
   drive(0, 0);
 
 }
@@ -164,20 +166,20 @@ int turn_dir_2() {
 
 
 
-void make_turn_2(int turn, float aggr){
+void make_turn_2(int turn){
   if (turn == 0){
     drive(170, 170);
   }
   if (turn == 1){
-    drive(120, 120 - aggr*96);
+    drive(170, 30);
   }
   if (turn == 2) {
-    drive(90 + aggr*160, 90 - aggr*160);
+    drive(200, 10);
   }
   if (turn == -1){
-    drive(120 - aggr*120, 120 + aggr*120);
+    drive(30, 170);
   }
   if (turn == -2) {
-    drive(90 - aggr*160, 90 + aggr*160);
+    drive(10, 200);
   }
 }

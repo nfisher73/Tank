@@ -35,6 +35,8 @@ bool on_line = true;
 bool prev_on_line = true;
 int gaps = 0;
 
+unsigned long time;
+
 
 #define GAP 1;
 #define RIGHT 2;
@@ -57,6 +59,8 @@ void setup() {
   cur_turn = 0;
   drive(0, 0);
 
+  time = millis();
+
 }
 
 
@@ -65,31 +69,15 @@ void loop() {
   r = sense_r();
   m = sense_m();
 
-  prev_on_line = on_line;
-
-  if (l == 0 && r == 0 && m == 0){
-    on_line = false;
-  } else {
-    on_line = true;
-  }
-
-  if(on_line == false){
-    drive(255, -255);
-  } else if (prev_on_line == false){
-    state = CURVY;
+  if(millis() - time > 5800){
     drive(0, 0);
   } else {
-    simple();
+    cur_turn = turn_dir(prev);
+    prev = cur_turn;
+    make_turn_4(cur_turn);
   }
 
-
   delay(5);
-}
-
-void simple(){
-  cur_turn = turn_dir(prev);
-  prev = cur_turn;
-  make_turn(cur_turn);
 }
 
 void drive(int speedL, int speedR){
@@ -172,27 +160,27 @@ int turn_dir(int prev_turn) {
   }
 }
 
-void make_turn(int turn){
+
+void make_turn_4(int turn){
   if (turn == 0){
-    drive(255, 255);
+    drive(170, 170);
   }
   if (turn == 1){
-    drive(255, 70);
+    drive(170, 30);
   }
   if (turn == 2) {
-    drive(255, 0);
+    drive(200, 10);
   }
-  if (turn == 3) {
-    drive(255, -120);
+  if (turn == 3){
+    drive(220, -30);
   }
   if (turn == -1){
-    drive(70, 255);
+    drive(30, 170);
   }
   if (turn == -2) {
-    drive(0, 255);
+    drive(10, 200);
   }
-  if (turn == -3) {
-    drive(-120, 255);
+  if (turn == -3){
+    drive(-30, 220);
   }
 }
-

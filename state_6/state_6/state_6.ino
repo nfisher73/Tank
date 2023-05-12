@@ -2,7 +2,8 @@
 #define GAP_LEFT 2
 #define TANK_RIGHT 3
 #define CURVY 4
-#define LOOP 5
+#define DIAMOND 5
+#define LOOP 6
 
 const int left_sens = A0;
 const int mid_sens = A1;
@@ -53,7 +54,7 @@ void setup() {
   pinMode(STDBY , OUTPUT);
   digitalWrite(STDBY , HIGH);
 
-  prev = 0;
+  prev = 3;
   cur_turn = 0;
   drive(0, 0);
 
@@ -65,32 +66,13 @@ void loop() {
   r = sense_r();
   m = sense_m();
 
-  prev_on_line = on_line;
-
-  if (l == 0 && r == 0 && m == 0){
-    on_line = false;
-  } else {
-    on_line = true;
-  }
-
-  if(on_line == false){
-    drive(255, -255);
-  } else if (prev_on_line == false){
-    state = CURVY;
-    drive(0, 0);
-  } else {
-    simple();
-  }
-
+  cur_turn = turn_dir_6(prev);
+  prev = cur_turn;
+  make_turn_6(cur_turn);
 
   delay(5);
 }
 
-void simple(){
-  cur_turn = turn_dir(prev);
-  prev = cur_turn;
-  make_turn(cur_turn);
-}
 
 void drive(int speedL, int speedR){
   // Here, speed is an integer from -255 to 255
@@ -141,19 +123,18 @@ int sense_m() {
   }
 }
 
-
-int turn_dir(int prev_turn) {
+int turn_dir_6(int prev_turn) {
   if (l == 1 && r == 1 && m == 1){
-    return 0; //straight
-  }
-  else if (l == 0 && r == 1 && m ==1){
     return 1; // slight right
   }
+  else if (l == 0 && r == 1 && m ==1){
+    return 2; // hard right
+  }
   else if (l == 0 && r == 1 && m ==0){
-    return 2; // big right
+    return 3; // huge right
   }
   else if (l == 1 && r == 0 && m ==1){
-    return -1; // slight left
+    return 0; // straight
   }
   else if (l == 1 && r == 0 && m ==0){
     return -2; // big left
@@ -172,27 +153,26 @@ int turn_dir(int prev_turn) {
   }
 }
 
-void make_turn(int turn){
+void make_turn_6(int turn){
   if (turn == 0){
-    drive(255, 255);
+    drive(200, 200);
   }
   if (turn == 1){
-    drive(255, 70);
+    drive(220, 70);
   }
   if (turn == 2) {
     drive(255, 0);
   }
   if (turn == 3) {
-    drive(255, -120);
+    drive(255, -200);
   }
   if (turn == -1){
     drive(70, 255);
   }
   if (turn == -2) {
-    drive(0, 255);
+    drive(100, 255);
   }
   if (turn == -3) {
     drive(-120, 255);
   }
 }
-

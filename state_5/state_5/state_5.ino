@@ -2,7 +2,8 @@
 #define GAP_LEFT 2
 #define TANK_RIGHT 3
 #define CURVY 4
-#define LOOP 5
+#define DIAMOND 5
+#define LOOP 6
 
 const int left_sens = A0;
 const int mid_sens = A1;
@@ -24,7 +25,6 @@ const int PWMR =5;
 
 int prev = 0;
 int cur_turn = 0;
-float aggr = 0.95;
 
 // Line Sensor Variables
 int l;
@@ -76,7 +76,7 @@ void loop() {
   if(on_line == false){
     drive(255, -255);
   } else if (prev_on_line == false){
-    state = CURVY;
+    state = LOOP;
     drive(0, 0);
   } else {
     simple();
@@ -141,7 +141,6 @@ int sense_m() {
   }
 }
 
-
 int turn_dir(int prev_turn) {
   if (l == 1 && r == 1 && m == 1){
     return 0; //straight
@@ -195,4 +194,3 @@ void make_turn(int turn){
     drive(-120, 255);
   }
 }
-
