@@ -4,6 +4,7 @@
 #define CURVY 4
 #define DIAMOND 5
 #define LOOP 6
+#define FINISH 7
 
 const int left_sens = A0;
 const int mid_sens = A1;
@@ -113,7 +114,7 @@ void loop() {
         gaps++;
         }
         cur_turn = turn_dir_2();
-        make_turn_2(cur_turn, aggr);
+        make_turn_2(cur_turn);
 
       }
       break;
@@ -136,7 +137,7 @@ void loop() {
     case CURVY:
       if(millis() - start_time > 5800){
         drive(0, 0);
-        stae = LOOP;
+        state = LOOP;
       } else {
         cur_turn = turn_dir(prev);
         prev = cur_turn;
@@ -150,6 +151,7 @@ void loop() {
       } else if (prev_on_line == false){
         state = LOOP;
         prev = 3;
+        start_time = millis();
         //drive(0, 0);
       } else {
         simple();
@@ -157,10 +159,19 @@ void loop() {
       break;
 
     case LOOP:
-      cur_turn = turn_dir_6(prev);
-      prev = cur_turn;
-      make_turn_6(cur_turn);
+      if (on_line == false && millis() - start_time > 8000){
+        state = FINISH;
+        drive(0, 0);
+      } else{
+        cur_turn = turn_dir_6(prev);
+        prev = cur_turn;
+        make_turn_6(cur_turn);
+      }
       break;
+
+
+    case FINISH:
+      drive(0, 0);
 
     default:
       state = START;
