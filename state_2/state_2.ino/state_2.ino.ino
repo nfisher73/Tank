@@ -8,9 +8,9 @@ const int left_sens = A0;
 const int mid_sens = A1;
 const int right_sens = A2;
 
-int threshold_l = 750;
-int threshold_r = 800;
-int threshold_m = 800;
+int threshold_l = 600;
+int threshold_r = 630;
+int threshold_m = 515;
 int state;
 
 const int PWML=11; // Pololu drive A
@@ -76,7 +76,7 @@ void loop() {
     if(on_line == true){
       drive(0, 0);
     } else{
-      drive(-255, 255);
+      drive(-200, 200);
     }
   } else{ 
 
@@ -84,7 +84,7 @@ void loop() {
     gaps++;
     }
     cur_turn = turn_dir_2();
-    make_turn_2(cur_turn, aggr);
+    make_turn_2(cur_turn);
 
   }
   delay(5);

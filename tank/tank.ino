@@ -10,9 +10,9 @@ const int left_sens = A0;
 const int mid_sens = A1;
 const int right_sens = A2;
 
-int threshold_l = 750;
-int threshold_r = 800;
-int threshold_m = 800;
+int threshold_l = 500;
+int threshold_r = 525;
+int threshold_m = 505;
 int state;
 
 const int PWML=11; // Pololu drive A
@@ -84,17 +84,17 @@ void loop() {
     case START:
       simple();
 
-      if (millis() - start_time > 23700){
+      if (millis() - start_time > 22400){
         state = GAP_LEFT;
         start_time = millis();
       } else if (millis() - start_time > 16000){
-        threshold_l = 750;
-        threshold_r = 800;
-        threshold_m = 800;
-      } else if (millis() - start_time > 12500){
-        threshold_l = 600;
-        threshold_r = 600;
-        threshold_m = 650;
+        threshold_l = 500;
+        threshold_r = 530;
+        threshold_m = 505;
+      } else if (millis() - start_time > 11500){
+        threshold_l = 200;
+        threshold_r = 340;
+        threshold_m = 200;
       }
       break;
 
@@ -104,6 +104,7 @@ void loop() {
         if(on_line == true){
           state = TANK_RIGHT;
           prev = -3;
+          start_time = millis();
           //drive(0, 0);
         } else{
           drive(-255, 255);
@@ -121,9 +122,9 @@ void loop() {
     
 
     case TANK_RIGHT:
-      if(on_line == false){
+      if(on_line == false && millis() - start_time > 1500){
         drive(255, -255);
-      } else if (prev_on_line == false){
+      } else if (prev_on_line == false && millis() - start_time > 1500){
         state = CURVY;
         prev = 3;
         start_time = millis();
@@ -135,9 +136,9 @@ void loop() {
 
 
     case CURVY:
-      if(millis() - start_time > 5800){
-        drive(0, 0);
+      if(millis() - start_time > 6500){
         state = LOOP;
+        start_time = millis();
       } else {
         cur_turn = turn_dir(prev);
         prev = cur_turn;
@@ -146,20 +147,20 @@ void loop() {
       break;
 
     case DIAMOND:
-      if(on_line == false){
-        drive(255, -255);
-      } else if (prev_on_line == false){
-        state = LOOP;
-        prev = 3;
+      if(on_line == false && millis() - start_time > 3500){
+        drive(200, -200);
+      } else if (prev_on_line == false && millis() - start_time > 3500){
         start_time = millis();
-        //drive(0, 0);
+        state = LOOP;
       } else {
-        simple();
+        cur_turn = turn_dir(prev);
+        prev = cur_turn;
+        make_turn_5(cur_turn);
       }
       break;
 
     case LOOP:
-      if (on_line == false && millis() - start_time > 8000){
+      if (on_line == false && millis() - start_time > 10000){
         state = FINISH;
         drive(0, 0);
       } else{
@@ -324,19 +325,19 @@ void make_turn(int turn){
     drive(255, 255);
   }
   if (turn == 1){
-    drive(255, 70);
+    drive(255, 90);
   }
   if (turn == 2) {
-    drive(255, 0);
+    drive(255, 30);
   }
   if (turn == 3) {
     drive(255, -120);
   }
   if (turn == -1){
-    drive(70, 255);
+    drive(90, 255);
   }
   if (turn == -2) {
-    drive(0, 255);
+    drive(30, 255);
   }
   if (turn == -3) {
     drive(-120, 255);
@@ -366,25 +367,48 @@ void make_turn_4(int turn){
     drive(170, 170);
   }
   if (turn == 1){
-    drive(170, 30);
+    drive(200, 100);
   }
   if (turn == 2) {
-    drive(200, 10);
+    drive(255, 75);
   }
   if (turn == 3){
-    drive(220, -30);
+    drive(255, -50);
   }
   if (turn == -1){
-    drive(30, 170);
+    drive(50, 255);
   }
   if (turn == -2) {
-    drive(10, 200);
+    drive(-20, 255);
   }
   if (turn == -3){
-    drive(-30, 220);
+    drive(-150, 255);
   }
 }
 
+void make_turn_5(int turn){
+  if (turn == 0){
+    drive(200, 200);
+  }
+  if (turn == 1){
+    drive(200, 100);
+  }
+  if (turn == 2) {
+    drive(200, 25);
+  }
+  if (turn == 3) {
+    drive(255, -120);
+  }
+  if (turn == -1){
+    drive(100, 200);
+  }
+  if (turn == -2) {
+    drive(25, 200);
+  }
+  if (turn == -3) {
+    drive(-120, 255);
+  }
+}
 int turn_dir_6(int prev_turn) {
   if (l == 1 && r == 1 && m == 1){
     return 1; // slight right
@@ -411,7 +435,7 @@ int turn_dir_6(int prev_turn) {
     return prev_turn; // continue last motion
   }
   else{
-    return 0;
+    return prev_turn;
   }
 }
 
@@ -420,21 +444,21 @@ void make_turn_6(int turn){
     drive(200, 200);
   }
   if (turn == 1){
-    drive(220, 70);
+    drive(220, 50);
   }
   if (turn == 2) {
-    drive(255, 0);
+    drive(200, 75);
   }
   if (turn == 3) {
-    drive(255, -200);
+    drive(255, 0);
   }
   if (turn == -1){
-    drive(70, 255);
+    drive(125, 225);
   }
   if (turn == -2) {
-    drive(100, 255);
+    drive(100, 250);
   }
   if (turn == -3) {
-    drive(-120, 255);
+    drive(0, 255);
   }
 }

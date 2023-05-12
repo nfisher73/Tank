@@ -8,9 +8,9 @@ const int left_sens = A0;
 const int mid_sens = A1;
 const int right_sens = A2;
 
-int threshold_l = 750;
-int threshold_r = 800;
-int threshold_m = 800;
+int threshold_l = 600;
+int threshold_r = 630;
+int threshold_m = 515;
 int state;
 
 const int PWML=11; // Pololu drive A
@@ -35,6 +35,8 @@ bool on_line = true;
 bool prev_on_line = true;
 int gaps = 0;
 
+unsigned long time;
+
 
 #define GAP 1;
 #define RIGHT 2;
@@ -55,7 +57,8 @@ void setup() {
 
   prev = 0;
   cur_turn = 0;
-  drive(0, 0);
+  time = millis();
+  //drive(0, 0);
 
 }
 
@@ -73,11 +76,12 @@ void loop() {
     on_line = true;
   }
 
-  if(on_line == false){
-    drive(255, -255);
-  } else if (prev_on_line == false){
+  if(on_line == false && millis() - time > 1500){
+    drive(200, -200);
+  } else if (prev_on_line == false && millis() - time > 1500){
     state = CURVY;
     drive(0, 0);
+    while(true);
   } else {
     simple();
   }
@@ -174,22 +178,22 @@ int turn_dir(int prev_turn) {
 
 void make_turn(int turn){
   if (turn == 0){
-    drive(255, 255);
+    drive(230, 230);
   }
   if (turn == 1){
-    drive(255, 70);
+    drive(230, 70);
   }
   if (turn == 2) {
-    drive(255, 0);
+    drive(230, 0);
   }
   if (turn == 3) {
     drive(255, -120);
   }
   if (turn == -1){
-    drive(70, 255);
+    drive(70, 230);
   }
   if (turn == -2) {
-    drive(0, 255);
+    drive(0, 230);
   }
   if (turn == -3) {
     drive(-120, 255);
